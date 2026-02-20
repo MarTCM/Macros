@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { SQLiteProvider } from "expo-sqlite";
 import { useColorScheme } from "react-native";
 import {
   MD3LightTheme as DefaultTheme,
@@ -89,18 +90,35 @@ const darkTheme = {
   },
 };
 
+const initializeDatabase = async (db: any) => {
+  await db.execAsync(`
+    PRAGMA journal_mode = WAL;
+    CREATE TABLE IF NOT EXISTS meals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      calories INTEGER NOT NULL,
+      protein INTEGER NOT NULL,
+      carbs INTEGER NOT NULL,
+      fats INTEGER NOT NULL,
+      date TEXT DEFAULT CURRENT_DATE
+    );
+  `);
+};
+
 function AppStack() {
   const theme = useTheme();
   return (
-    <Stack
-      screenOptions={{
-        contentStyle: { backgroundColor: theme.colors.background },
-        headerStyle: { backgroundColor: theme.colors.surface },
-        headerTintColor: theme.colors.onSurface,
-      }}
-    >
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <SQLiteProvider databaseName="macros.db" onInit={initializeDatabase}>
+      <Stack
+        screenOptions={{
+          contentStyle: { backgroundColor: theme.colors.background },
+          headerStyle: { backgroundColor: theme.colors.surface },
+          headerTintColor: theme.colors.onSurface,
+        }}
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </SQLiteProvider>
   );
 }
 

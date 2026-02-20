@@ -1,33 +1,45 @@
 import CircularProgress from "@/components/CircularProgress";
-import { View } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import MealDetailDialog, { Meal } from "@/components/MealDetailDialog";
+import { useMacros } from "@/context/MacrosContext";
+import { useEffect, useState } from "react";
+import { ScrollView, View } from "react-native";
+import { Divider, List, Text, useTheme } from "react-native-paper";
 
 export default function Index() {
   const theme = useTheme();
+  const { todayTotals, todayMeals, fetchTodayProgress } = useMacros();
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
-  // Replace these with your real state/data later
-  const caloriesCurrent = 1500;
-  const caloriesGoal = 2000;
+  useEffect(() => {
+    fetchTodayProgress();
+  }, []);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
+    <ScrollView
+      contentContainerStyle={{
         alignItems: "center",
         gap: 32,
+        paddingVertical: 32,
         backgroundColor: theme.colors.background,
       }}
+      style={{ backgroundColor: theme.colors.background }}
     >
+      <MealDetailDialog
+        meal={selectedMeal}
+        visible={!!selectedMeal}
+        onDismiss={() => setSelectedMeal(null)}
+      />
+
       <Text
         variant="headlineMedium"
         style={{ color: theme.colors.onBackground }}
       >
         Today's Intake
       </Text>
+
       <CircularProgress
-        current={caloriesCurrent}
-        goal={caloriesGoal}
+        current={todayTotals.calories}
+        goal={2000}
         label="Calories"
         unit="kcal"
       />
@@ -40,33 +52,72 @@ export default function Index() {
         }}
       >
         <CircularProgress
-          current={80}
+          current={todayTotals.protein}
           goal={150}
           size={120}
           strokeWidth={10}
           label="Protein"
           unit="g"
-          color="#E53935" // red
+          color="#E53935"
         />
         <CircularProgress
-          current={200}
+          current={todayTotals.carbs}
           goal={250}
           size={120}
           strokeWidth={10}
           label="Carbs"
           unit="g"
-          color="#FB8C00" // orange
+          color="#FB8C00"
         />
         <CircularProgress
-          current={55}
+          current={todayTotals.fats}
           goal={65}
           size={120}
           strokeWidth={10}
           label="Fat"
           unit="g"
-          color="#8E24AA" // purple
+          color="#8E24AA"
         />
       </View>
-    </View>
+
+      <View style={{ width: "100%" }}>
+        <Text
+          variant="titleMedium"
+          style={{
+            color: theme.colors.onBackground,
+            paddingHorizontal: 16,
+            paddingBottom: 8,
+          }}
+        >
+          Today's Meals
+        </Text>
+        {todayMeals.length === 0 ? (
+          <Text
+            variant="bodyMedium"
+            style={{
+              color: theme.colors.onSurfaceVariant,
+              paddingHorizontal: 16,
+            }}
+          >
+            No meals logged yet. Head to the Gains tab!
+          </Text>
+        ) : (
+          todayMeals.map((meal, i) => (
+            <View key={meal.id}>
+              <List.Item
+                title={meal.name}
+                description={`${meal.calories} · ${meal.protein} P · ${meal.carbs} C · ${meal.fats} F`}
+                left={(props) => <List.Icon {...props} icon="food" />}
+                onPress={() => setSelectedMeal(meal)}
+                titleStyle={{ color: theme.colors.onSurface }}
+                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                style={{ backgroundColor: theme.colors.surface }}
+              />
+              {i < todayMeals.length - 1 && <Divider />}
+            </View>
+          ))
+        )}
+      </View>
+    </ScrollView>
   );
 }

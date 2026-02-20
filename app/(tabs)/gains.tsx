@@ -1,50 +1,17 @@
 import DialogBox from "@/components/Dialog";
+import { useMacros } from "@/context/MacrosContext";
+import { fetchGains } from "@/libs/gemini";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import axios from "axios";
+import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
 import { Keyboard, View } from "react-native";
-import { IconButton, Text, TextInput, useTheme } from "react-native-paper";
-
-const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-const GEMINI_MODEL = "gemini-3-flash-preview";
-
-const SYSTEM_INSTRUCTION = `You are an expert nutritionist and dietitian with deep knowledge of food science, macronutrients, and caloric density. Your task is to analyze the meal or food items provided by the user and estimate their nutritional profile as accurately as possible.
-
-CRITICAL INSTRUCTIONS:
-1. You must respond STRICTLY and ONLY with a valid JSON object.
-2. Do not include any greetings, conversational filler, or markdown formatting (do NOT use \`\`\`json or \`\`\` tags). Just output the raw JSON object.
-3. If a meal's portion size is not specified, assume a standard average serving size for an adult.
-4. All macro values must include their standard units (e.g., "kcal" for calories, "g" for macros).
-
-Your JSON output must exactly match the following structure:
-{
-  "calories": "<number> kcal",
-  "protein": "<number> g",
-  "carbs": "<number> g",
-  "fats": "<number> g",
-  "evaluation": "<A brief, 1-2 sentence professional evaluation of the meal's nutritional balance and health impact>"
-}`;
-
-async function fetchGains(prompt: string): Promise<string> {
-  const response = await axios.post(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      system_instruction: {
-        parts: [{ text: SYSTEM_INSTRUCTION }],
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }],
-        },
-      ],
-    },
-  );
-  return response.data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-}
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 
 export default function Gains() {
   const theme = useTheme();
+  const db = useSQLiteContext();
+  const { fetchTodayProgress } = useMacros();
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -66,6 +33,20 @@ export default function Gains() {
     }
   }
 
+  const logMeal = async (mealData: any) => {
+    await db.runAsync(
+      `INSERT INTO meals (name, calories, protein, carbs, fats) VALUES (?, ?, ?, ?, ?);`,
+      [
+        mealData.name,
+        mealData.calories,
+        mealData.protein,
+        mealData.carbs,
+        mealData.fats,
+      ],
+    );
+    await fetchTodayProgress();
+  };
+
   return (
     <View
       style={{
@@ -79,6 +60,7 @@ export default function Gains() {
         text={result}
         visible={dialogVisible}
         onDismiss={() => setDialogVisible(false)}
+        logMeal={logMeal}
       />
       <Text variant="headlineLarge">What did you eat?</Text>
       <View
@@ -96,14 +78,16 @@ export default function Gains() {
           onChangeText={setPrompt}
           style={{ width: "80%", marginTop: 16 }}
         />
-        <IconButton
+        <Button
           mode="contained"
           icon={({ color, size }) => (
             <MaterialIcons name="send" color={color} size={size} />
           )}
           onPress={handleSend}
           style={{ marginTop: 16, marginLeft: 8 }}
-        />
+        >
+          Gimme Macros!
+        </Button>
       </View>
     </View>
   );
