@@ -15,11 +15,13 @@ export default function Gains() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function handleSend() {
     if (!prompt.trim()) return;
     try {
       Keyboard.dismiss();
+      setLoading(true);
       const text = await fetchGains(prompt);
       setResult(text);
       setPrompt("");
@@ -31,6 +33,8 @@ export default function Gains() {
           JSON.stringify(error.response?.data, null, 2),
         );
       }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -81,6 +85,8 @@ export default function Gains() {
         />
         <Button
           mode="contained"
+          loading={loading}
+          disabled={loading}
           icon={({ color, size }) => (
             <MaterialIcons name="send" color={color} size={size} />
           )}
