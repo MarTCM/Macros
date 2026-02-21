@@ -17,6 +17,7 @@ export default function Gains() {
   const [dialogVisible, setDialogVisible] = useState(false);
 
   async function handleSend() {
+    if (!prompt.trim()) return;
     try {
       Keyboard.dismiss();
       const text = await fetchGains(prompt);
