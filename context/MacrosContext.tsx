@@ -14,6 +14,7 @@ type MacrosContextType = {
   todayMeals: Meal[];
   fetchTodayProgress: () => Promise<void>;
   deleteMeal: (id: number) => Promise<void>;
+  searchDate: (date: Date) => Promise<Meal[]>;
 };
 
 const MacrosContext = createContext<MacrosContextType | null>(null);
@@ -63,6 +64,21 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     setTodayMeals(mealsResult);
   }, [db]);
 
+  const searchDate = useCallback(
+    async (date: Date) => {
+      const mealsResult = await db.getAllAsync<Meal>(
+        `
+        SELECT id, name, calories, protein, carbs, fats
+        FROM meals
+        WHERE date = ?;
+      `,
+        [date.toISOString().split("T")[0]],
+      );
+      return mealsResult;
+    },
+    [db],
+  );
+
   const deleteMeal = useCallback(
     async (id: number) => {
       await db.runAsync(`DELETE FROM meals WHERE id = ?;`, [id]);
@@ -73,7 +89,13 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <MacrosContext.Provider
-      value={{ todayTotals, todayMeals, fetchTodayProgress, deleteMeal }}
+      value={{
+        todayTotals,
+        todayMeals,
+        fetchTodayProgress,
+        deleteMeal,
+        searchDate,
+      }}
     >
       {children}
     </MacrosContext.Provider>

@@ -40,6 +40,15 @@ export default function TabsLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="history"
+          options={{
+            title: "History",
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="history" color={color} size={size} />
+            ),
+          }}
+        />
       </Tabs>
     </MacrosProvider>
   );
