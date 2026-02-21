@@ -13,6 +13,7 @@ type MacrosContextType = {
   todayTotals: Totals;
   todayMeals: Meal[];
   fetchTodayProgress: () => Promise<void>;
+  deleteMeal: (id: number) => Promise<void>;
 };
 
 const MacrosContext = createContext<MacrosContextType | null>(null);
@@ -62,9 +63,17 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     setTodayMeals(mealsResult);
   }, [db]);
 
+  const deleteMeal = useCallback(
+    async (id: number) => {
+      await db.runAsync(`DELETE FROM meals WHERE id = ?;`, [id]);
+      await fetchTodayProgress();
+    },
+    [db, fetchTodayProgress],
+  );
+
   return (
     <MacrosContext.Provider
-      value={{ todayTotals, todayMeals, fetchTodayProgress }}
+      value={{ todayTotals, todayMeals, fetchTodayProgress, deleteMeal }}
     >
       {children}
     </MacrosContext.Provider>

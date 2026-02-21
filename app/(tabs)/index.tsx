@@ -3,11 +3,12 @@ import MealDetailDialog, { Meal } from "@/components/MealDetailDialog";
 import { useMacros } from "@/context/MacrosContext";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { Divider, List, Text, useTheme } from "react-native-paper";
+import { Divider, IconButton, List, Text, useTheme } from "react-native-paper";
 
 export default function Index() {
   const theme = useTheme();
-  const { todayTotals, todayMeals, fetchTodayProgress } = useMacros();
+  const { todayTotals, todayMeals, fetchTodayProgress, deleteMeal } =
+    useMacros();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
   useEffect(() => {
@@ -108,6 +109,12 @@ export default function Index() {
                 title={meal.name}
                 description={`${meal.calories} · ${meal.protein} P · ${meal.carbs} C · ${meal.fats} F`}
                 left={(props) => <List.Icon {...props} icon="food" />}
+                right={() => (
+                  <IconButton
+                    icon="delete"
+                    onPress={() => deleteMeal(meal.id)}
+                  />
+                )}
                 onPress={() => setSelectedMeal(meal)}
                 titleStyle={{ color: theme.colors.onSurface }}
                 descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
