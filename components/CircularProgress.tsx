@@ -1,6 +1,16 @@
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 import { View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
+import Animated, {
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import Svg, { Circle, G } from "react-native-svg";
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type Props = {
   current: number;
@@ -27,20 +37,36 @@ export default function CircularProgress({
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = Math.min(current / goal, 1);
-  const strokeDashoffset = circumference * (1 - progress);
+  const targetOffset = circumference * (1 - progress);
   const center = size / 2;
 
-  // Over-goal always shows error red; otherwise use the explicit color or theme fallback
   const progressColor =
     progress >= 1
       ? theme.colors.error
       : (color ??
         (progress >= 0.85 ? theme.colors.secondary : theme.colors.primary));
 
+  // Animate from fully empty (circumference) to the real offset
+  const animatedOffset = useSharedValue(circumference);
+
+  // Re-animate every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      animatedOffset.value = circumference;
+      animatedOffset.value = withTiming(targetOffset, {
+        duration: 900,
+        easing: Easing.out(Easing.cubic),
+      });
+    }, [targetOffset]),
+  );
+
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: animatedOffset.value,
+  }));
+
   return (
     <View style={{ alignItems: "center", justifyContent: "center" }}>
       <Svg width={size} height={size}>
-        {/* Rotate so the arc starts at the top */}
         <G rotation="-90" origin={`${center}, ${center}`}>
           {/* Background track */}
           <Circle
@@ -51,8 +77,8 @@ export default function CircularProgress({
             strokeWidth={strokeWidth}
             fill="none"
           />
-          {/* Progress arc */}
-          <Circle
+          {/* Animated progress arc */}
+          <AnimatedCircle
             cx={center}
             cy={center}
             r={radius}
@@ -60,7 +86,7 @@ export default function CircularProgress({
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            animatedProps={animatedProps}
             strokeLinecap="round"
           />
         </G>
