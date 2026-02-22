@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
-import { ScrollView } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { fetchGains } from "../libs/gemini";
 
@@ -87,85 +87,90 @@ export default function AppSetup() {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        alignItems: "center",
-        justifyContent: "center",
-        flexGrow: 1,
-        paddingVertical: 32,
-        backgroundColor: theme.colors.background,
-      }}
-      style={{ backgroundColor: theme.colors.background }}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <Text
-        variant="headlineMedium"
-        style={{ color: theme.colors.onBackground }}
+      <ScrollView
+        contentContainerStyle={{
+          alignItems: "center",
+          justifyContent: "center",
+          flexGrow: 1,
+          paddingVertical: 32,
+          backgroundColor: theme.colors.background,
+        }}
+        style={{ backgroundColor: theme.colors.background }}
       >
-        Welcome to Macros!
-      </Text>
-      <Text
-        variant="bodyMedium"
-        style={{ color: theme.colors.onBackground, marginTop: 16 }}
-      >
-        Let's start by setting up your profile.
-      </Text>
-      <TextInput
-        label="Name"
-        mode="outlined"
-        disabled={loading}
-        value={name}
-        onChangeText={setName}
-        style={{ width: "80%", marginTop: 16 }}
-      />
-      <TextInput
-        label="Age"
-        mode="outlined"
-        disabled={loading}
-        value={age}
-        onChangeText={setAge}
-        style={{ width: "80%", marginTop: 16 }}
-      />
-      <TextInput
-        label="Weight (kg)"
-        mode="outlined"
-        disabled={loading}
-        value={weight}
-        onChangeText={setWeight}
-        style={{ width: "80%", marginTop: 16 }}
-      />
-      <TextInput
-        label="Height (cm)"
-        mode="outlined"
-        disabled={loading}
-        value={height}
-        onChangeText={setHeight}
-        style={{ width: "80%", marginTop: 16 }}
-      />
-      <TextInput
-        label="Activity Level (Lightly Active, Active, Very Active)"
-        mode="outlined"
-        disabled={loading}
-        value={activityLevel}
-        onChangeText={setActivityLevel}
-        style={{ width: "80%", marginTop: 16 }}
-      />
-      <TextInput
-        label="Goal (e.g., Lose Weight, Maintain Weight, Gain Muscle)"
-        mode="outlined"
-        disabled={loading}
-        value={goal}
-        onChangeText={setGoal}
-        style={{ width: "80%", marginTop: 16 }}
-      />
-      <Button
-        mode="contained"
-        onPress={completeSetup}
-        loading={loading}
-        disabled={loading}
-        style={{ marginTop: 32 }}
-      >
-        Complete Setup
-      </Button>
-    </ScrollView>
+        <Text
+          variant="headlineMedium"
+          style={{ color: theme.colors.onBackground }}
+        >
+          Welcome to Macros!
+        </Text>
+        <Text
+          variant="bodyMedium"
+          style={{ color: theme.colors.onBackground, marginTop: 16 }}
+        >
+          Let's start by setting up your profile.
+        </Text>
+        <TextInput
+          label="Name"
+          mode="outlined"
+          disabled={loading}
+          value={name}
+          onChangeText={setName}
+          style={{ width: "80%", marginTop: 16 }}
+        />
+        <TextInput
+          label="Age"
+          mode="outlined"
+          disabled={loading}
+          value={age}
+          onChangeText={setAge}
+          style={{ width: "80%", marginTop: 16 }}
+        />
+        <TextInput
+          label="Weight (kg)"
+          mode="outlined"
+          disabled={loading}
+          value={weight}
+          onChangeText={setWeight}
+          style={{ width: "80%", marginTop: 16 }}
+        />
+        <TextInput
+          label="Height (cm)"
+          mode="outlined"
+          disabled={loading}
+          value={height}
+          onChangeText={setHeight}
+          style={{ width: "80%", marginTop: 16 }}
+        />
+        <TextInput
+          label="Activity Level (Lightly Active, Active, Very Active)"
+          mode="outlined"
+          disabled={loading}
+          value={activityLevel}
+          onChangeText={setActivityLevel}
+          style={{ width: "80%", marginTop: 16 }}
+        />
+        <TextInput
+          label="Goal (e.g., Lose Weight, Maintain Weight, Gain Muscle)"
+          mode="outlined"
+          disabled={loading}
+          value={goal}
+          onChangeText={setGoal}
+          style={{ width: "80%", marginTop: 16 }}
+        />
+        <Button
+          mode="contained"
+          onPress={completeSetup}
+          loading={loading}
+          disabled={loading}
+          style={{ marginTop: 32 }}
+        >
+          Complete Setup
+        </Button>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

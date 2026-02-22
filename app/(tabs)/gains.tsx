@@ -6,7 +6,7 @@ import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
-import { Keyboard, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform, View } from "react-native";
 import {
   Button,
   IconButton,
@@ -93,90 +93,95 @@ export default function Gains() {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: theme.colors.background,
-      }}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <DialogBox
-        text={result}
-        visible={dialogVisible}
-        onDismiss={() => setDialogVisible(false)}
-        logMeal={logMeal}
-      />
-      <Text variant="headlineLarge">What did you eat?</Text>
       <View
         style={{
-          width: "100%",
-          alignItems: "center",
+          flex: 1,
           justifyContent: "center",
-          flexDirection: "column",
+          alignItems: "center",
+          backgroundColor: theme.colors.background,
         }}
       >
-        <TextInput
-          label="Describe your meal"
-          mode="outlined"
-          multiline
-          disabled={loading}
-          value={prompt}
-          onChangeText={setPrompt}
-          style={{ width: "80%", marginTop: 16 }}
+        <DialogBox
+          text={result}
+          visible={dialogVisible}
+          onDismiss={() => setDialogVisible(false)}
+          logMeal={logMeal}
         />
+        <Text variant="headlineLarge">What did you eat?</Text>
         <View
           style={{
-            flexDirection: "row",
-            gap: 8,
-            marginTop: 16,
+            width: "100%",
             alignItems: "center",
             justifyContent: "center",
+            flexDirection: "column",
           }}
         >
-          <Button
-            mode="contained"
-            loading={loading}
-            disabled={loading}
-            icon={({ color, size }) => (
-              <MaterialIcons name="send" color={color} size={size} />
-            )}
-            onPress={handleSend}
-            style={{ marginLeft: 8 }}
-          >
-            Gimme Macros!
-          </Button>
-          <IconButton
-            icon="camera"
+          <TextInput
+            label="Describe your meal"
             mode="outlined"
+            multiline
             disabled={loading}
-            loading={loading}
-            onPress={async () => {
-              const base64Image = await pickImage();
-              if (!base64Image) return;
-              try {
-                Keyboard.dismiss();
-                setLoading(true);
-                const text = await fetchGainsWithImage(
-                  systemPrompt,
-                  base64Image,
-                );
-                setResult(text);
-                setDialogVisible(true);
-              } catch (error) {
-                if (axios.isAxiosError(error)) {
-                  console.error(
-                    "Gemini image error:",
-                    JSON.stringify(error.response?.data, null, 2),
-                  );
-                }
-              } finally {
-                setLoading(false);
-              }
-            }}
+            value={prompt}
+            onChangeText={setPrompt}
+            style={{ width: "80%", marginTop: 16 }}
           />
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 8,
+              marginTop: 16,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              mode="contained"
+              loading={loading}
+              disabled={loading}
+              icon={({ color, size }) => (
+                <MaterialIcons name="send" color={color} size={size} />
+              )}
+              onPress={handleSend}
+              style={{ marginLeft: 8 }}
+            >
+              Gimme Macros!
+            </Button>
+            <IconButton
+              icon="camera"
+              mode="outlined"
+              disabled={loading}
+              loading={loading}
+              onPress={async () => {
+                const base64Image = await pickImage();
+                if (!base64Image) return;
+                try {
+                  Keyboard.dismiss();
+                  setLoading(true);
+                  const text = await fetchGainsWithImage(
+                    systemPrompt,
+                    base64Image,
+                  );
+                  setResult(text);
+                  setDialogVisible(true);
+                } catch (error) {
+                  if (axios.isAxiosError(error)) {
+                    console.error(
+                      "Gemini image error:",
+                      JSON.stringify(error.response?.data, null, 2),
+                    );
+                  }
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
