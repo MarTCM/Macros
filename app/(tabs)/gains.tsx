@@ -1,12 +1,19 @@
 import DialogBox from "@/components/Dialog";
 import { useMacros } from "@/context/MacrosContext";
-import { fetchGains } from "@/libs/gemini";
+import { fetchGains, fetchGainsWithImage } from "@/libs/gemini";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
 import { Keyboard, View } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import {
+  Button,
+  IconButton,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
 
 const systemPrompt = `You are an expert nutritionist and dietitian with deep knowledge of food science, macronutrients, and caloric density. Your task is to analyze the meal or food items provided by the user and estimate their nutritional profile as accurately as possible.
 
@@ -34,6 +41,21 @@ export default function Gains() {
   const [result, setResult] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  async function pickImage() {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      console.warn("Camera permission denied");
+      return;
+    }
+    const camera = await ImagePicker.launchCameraAsync({
+      base64: true,
+      quality: 0.7,
+    });
+    if (!camera.canceled) {
+      return camera.assets[0].base64;
+    }
+  }
 
   async function handleSend() {
     if (!prompt.trim()) return;
@@ -103,18 +125,57 @@ export default function Gains() {
           onChangeText={setPrompt}
           style={{ width: "80%", marginTop: 16 }}
         />
-        <Button
-          mode="contained"
-          loading={loading}
-          disabled={loading}
-          icon={({ color, size }) => (
-            <MaterialIcons name="send" color={color} size={size} />
-          )}
-          onPress={handleSend}
-          style={{ marginTop: 16, marginLeft: 8 }}
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 8,
+            marginTop: 16,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
-          Gimme Macros!
-        </Button>
+          <Button
+            mode="contained"
+            loading={loading}
+            disabled={loading}
+            icon={({ color, size }) => (
+              <MaterialIcons name="send" color={color} size={size} />
+            )}
+            onPress={handleSend}
+            style={{ marginLeft: 8 }}
+          >
+            Gimme Macros!
+          </Button>
+          <IconButton
+            icon="camera"
+            mode="outlined"
+            disabled={loading}
+            loading={loading}
+            onPress={async () => {
+              const base64Image = await pickImage();
+              if (!base64Image) return;
+              try {
+                Keyboard.dismiss();
+                setLoading(true);
+                const text = await fetchGainsWithImage(
+                  systemPrompt,
+                  base64Image,
+                );
+                setResult(text);
+                setDialogVisible(true);
+              } catch (error) {
+                if (axios.isAxiosError(error)) {
+                  console.error(
+                    "Gemini image error:",
+                    JSON.stringify(error.response?.data, null, 2),
+                  );
+                }
+              } finally {
+                setLoading(false);
+              }
+            }}
+          />
+        </View>
       </View>
     </View>
   );

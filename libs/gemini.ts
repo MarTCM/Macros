@@ -23,3 +23,27 @@ export async function fetchGains(
   );
   return response.data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
+
+export async function fetchGainsWithImage(
+  systemPrompt: string,
+  base64Image: string,
+): Promise<string> {
+  const response = await axios.post(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      system_instruction: {
+        parts: [{ text: systemPrompt }],
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: "Analyze the meal in this image." },
+            { inlineData: { mimeType: "image/jpeg", data: base64Image } },
+          ],
+        },
+      ],
+    },
+  );
+  return response.data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+}
