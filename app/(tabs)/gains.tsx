@@ -97,6 +97,8 @@ export default function Gains() {
         <TextInput
           label="Describe your meal"
           mode="outlined"
+          multiline
+          disabled={loading}
           value={prompt}
           onChangeText={setPrompt}
           style={{ width: "80%", marginTop: 16 }}
