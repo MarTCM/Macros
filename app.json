@@ -19,7 +19,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Macros"
+      "package": "com.martcm.Macros"
     },
     "web": {
       "output": "static",
