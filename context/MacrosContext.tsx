@@ -9,10 +9,19 @@ type Totals = {
   fats: number;
 };
 
+type Goals = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+};
+
 type MacrosContextType = {
   todayTotals: Totals;
   todayMeals: Meal[];
+  userGoals: Goals;
   fetchTodayProgress: () => Promise<void>;
+  fetchUserGoals: () => Promise<void>;
   deleteMeal: (id: number) => Promise<void>;
   searchDate: (date: Date) => Promise<Meal[]>;
 };
@@ -28,6 +37,21 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     fats: 0,
   });
   const [todayMeals, setTodayMeals] = useState<Meal[]>([]);
+  const [userGoals, setUserGoals] = useState<Goals>({
+    calories: 2000,
+    protein: 150,
+    carbs: 250,
+    fats: 65,
+  });
+
+  const fetchUserGoals = useCallback(async () => {
+    const result = await db.getAllAsync<Goals>(
+      `SELECT calories, protein, carbs, fats FROM users ORDER BY id DESC LIMIT 1;`,
+    );
+    if (result[0]) {
+      setUserGoals(result[0]);
+    }
+  }, [db]);
 
   const fetchTodayProgress = useCallback(async () => {
     const [totalsResult, mealsResult] = await Promise.all([
@@ -92,7 +116,9 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
       value={{
         todayTotals,
         todayMeals,
+        userGoals,
         fetchTodayProgress,
+        fetchUserGoals,
         deleteMeal,
         searchDate,
       }}

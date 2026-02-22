@@ -1,5 +1,6 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
+import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import {
   MD3LightTheme as DefaultTheme,
@@ -7,6 +8,7 @@ import {
   PaperProvider,
   useTheme,
 } from "react-native-paper";
+import { getSetupData } from "./setup";
 
 const lightTheme = {
   ...DefaultTheme,
@@ -103,10 +105,41 @@ const initializeDatabase = async (db: any) => {
       date TEXT DEFAULT CURRENT_DATE
     );
   `);
+  await db.execAsync(`
+    PRAGMA journal_mode = WAL;
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      weight REAL NOT NULL,
+      height REAL NOT NULL,
+      age INTEGER NOT NULL,
+      activity_level TEXT NOT NULL,
+      goal TEXT NOT NULL,
+      calories INTEGER NOT NULL,
+      protein INTEGER NOT NULL,
+      carbs INTEGER NOT NULL,
+      fats INTEGER NOT NULL
+    );
+  `);
 };
+
+// Separate component so useRouter doesn't live in the same
+// component as SQLiteProvider, preventing re-mount on navigation
+function NavigationHandler() {
+  const router = useRouter();
+
+  useEffect(() => {
+    getSetupData().then((setupData) => {
+      router.replace(setupData ? "/(tabs)" : "/setup");
+    });
+  }, []);
+
+  return null;
+}
 
 function AppStack() {
   const theme = useTheme();
+
   return (
     <SQLiteProvider databaseName="macros.db" onInit={initializeDatabase}>
       <Stack
@@ -117,7 +150,9 @@ function AppStack() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="setup" options={{ headerShown: false }} />
       </Stack>
+      <NavigationHandler />
     </SQLiteProvider>
   );
 }

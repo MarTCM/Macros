@@ -1,18 +1,40 @@
 import CircularProgress from "@/components/CircularProgress";
 import MealDetailDialog, { Meal } from "@/components/MealDetailDialog";
 import { useMacros } from "@/context/MacrosContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import { Divider, IconButton, List, Text, useTheme } from "react-native-paper";
+import {
+  Button,
+  Divider,
+  IconButton,
+  List,
+  Text,
+  useTheme,
+} from "react-native-paper";
 
 export default function Index() {
   const theme = useTheme();
-  const { todayTotals, todayMeals, fetchTodayProgress, deleteMeal } =
-    useMacros();
+  const {
+    todayTotals,
+    todayMeals,
+    fetchTodayProgress,
+    deleteMeal,
+    userGoals,
+    fetchUserGoals,
+  } = useMacros();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const router = useRouter();
+
+  const resetSetup = async () => {
+    await AsyncStorage.removeItem("isSetupComplete");
+    router.replace("/setup");
+  };
 
   useEffect(() => {
     fetchTodayProgress();
+    fetchUserGoals();
   }, []);
 
   return (
@@ -38,9 +60,18 @@ export default function Index() {
         Today's Intake
       </Text>
 
+      {/* TODO: remove before release */}
+      <Button
+        mode="outlined"
+        onPress={resetSetup}
+        textColor={theme.colors.error}
+      >
+        [DEV] Reset Setup
+      </Button>
+
       <CircularProgress
         current={todayTotals.calories}
-        goal={2000}
+        goal={userGoals.calories}
         label="Calories"
         unit="kcal"
       />
@@ -54,7 +85,7 @@ export default function Index() {
       >
         <CircularProgress
           current={todayTotals.protein}
-          goal={150}
+          goal={userGoals.protein}
           size={120}
           strokeWidth={10}
           label="Protein"
@@ -63,7 +94,7 @@ export default function Index() {
         />
         <CircularProgress
           current={todayTotals.carbs}
-          goal={250}
+          goal={userGoals.carbs}
           size={120}
           strokeWidth={10}
           label="Carbs"
@@ -72,7 +103,7 @@ export default function Index() {
         />
         <CircularProgress
           current={todayTotals.fats}
-          goal={65}
+          goal={userGoals.fats}
           size={120}
           strokeWidth={10}
           label="Fat"
