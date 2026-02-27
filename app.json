@@ -34,8 +34,10 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#F9FBF9",
+          "imageBackgroundColor": "#F9FBF9",
           "dark": {
-            "backgroundColor": "#121712"
+            "backgroundColor": "#121712",
+            "imageBackgroundColor": "#121712"
           }
         }
       ],

@@ -1,4 +1,4 @@
-import DialogBox from "@/components/Dialog";
+import DialogBox from "@/components/AnalysisDialog";
 import { useMacros } from "@/context/MacrosContext";
 import { fetchGains, fetchGainsWithImage } from "@/libs/gemini";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
