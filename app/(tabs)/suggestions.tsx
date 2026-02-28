@@ -4,8 +4,9 @@ import { useMacros } from "@/context/MacrosContext";
 import { fetchGains } from "@/libs/gemini";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import axios from "axios";
+import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Keyboard, ScrollView, View } from "react-native";
 
 import {
@@ -88,14 +89,25 @@ export async function suggestMeal(
 
 export default function Suggestions() {
   const theme = useTheme();
-  const { todayTotals, searchFavoriteMeals, fetchTodayProgress, userGoals } =
-    useMacros();
+  const {
+    todayTotals,
+    favoriteMeals,
+    loadFavoriteMeals,
+    fetchTodayProgress,
+    userGoals,
+  } = useMacros();
   const db = useSQLiteContext();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [prompt, setPrompt] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<string>("");
   const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFavoriteMeals();
+    }, [loadFavoriteMeals]),
+  );
 
   async function handleSend() {
     if (!prompt.trim()) return;
@@ -144,17 +156,6 @@ export default function Suggestions() {
     await loadFavoriteMeals();
   };
 
-  const [favoriteMeals, setFavoriteMeals] = useState<Meal[]>([]);
-
-  const loadFavoriteMeals = async () => {
-    const meals = await searchFavoriteMeals();
-    setFavoriteMeals(meals);
-  };
-
-  useEffect(() => {
-    loadFavoriteMeals();
-  }, []);
-
   return (
     <ScrollView
       contentContainerStyle={{
@@ -176,10 +177,7 @@ export default function Suggestions() {
       <MealDetailDialog
         meal={selectedMeal}
         visible={!!selectedMeal}
-        onDismiss={() => {
-          setSelectedMeal(null);
-          loadFavoriteMeals();
-        }}
+        onDismiss={() => setSelectedMeal(null)}
       />
 
       <Text

@@ -19,9 +19,11 @@ type Goals = {
 type MacrosContextType = {
   todayTotals: Totals;
   todayMeals: Meal[];
+  favoriteMeals: Meal[];
   userGoals: Goals;
   fetchTodayProgress: () => Promise<void>;
   fetchUserGoals: () => Promise<void>;
+  loadFavoriteMeals: () => Promise<void>;
   deleteMeal: (id: number) => Promise<void>;
   toggleFavorite: (id: number, isFavorite: boolean) => Promise<void>;
   searchDate: (date: Date) => Promise<Meal[]>;
@@ -39,6 +41,7 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     fats: 0,
   });
   const [todayMeals, setTodayMeals] = useState<Meal[]>([]);
+  const [favoriteMeals, setFavoriteMeals] = useState<Meal[]>([]);
   const [userGoals, setUserGoals] = useState<Goals>({
     calories: 2000,
     protein: 150,
@@ -116,15 +119,20 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     return mealsResult;
   }, [db]);
 
+  const loadFavoriteMeals = useCallback(async () => {
+    const mealsResult = await searchFavoriteMeals();
+    setFavoriteMeals(mealsResult);
+  }, [searchFavoriteMeals]);
+
   const toggleFavorite = useCallback(
     async (id: number, isFavorite: boolean) => {
       await db.runAsync(`UPDATE meals SET isFavorite = ? WHERE id = ?;`, [
         isFavorite ? 0 : 1,
         id,
       ]);
-      await fetchTodayProgress();
+      await Promise.all([fetchTodayProgress(), loadFavoriteMeals()]);
     },
-    [db, fetchTodayProgress],
+    [db, fetchTodayProgress, loadFavoriteMeals],
   );
 
   const deleteMeal = useCallback(
@@ -140,9 +148,11 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
       value={{
         todayTotals,
         todayMeals,
+        favoriteMeals,
         userGoals,
         fetchTodayProgress,
         fetchUserGoals,
+        loadFavoriteMeals,
         deleteMeal,
         toggleFavorite,
         searchDate,
