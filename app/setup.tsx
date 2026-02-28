@@ -1,10 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import {
+  Button,
+  HelperText,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
 import { fetchGains } from "../libs/gemini";
 
 const goalPrompt = `You are an expert sports nutritionist and dietitian. Your task is to calculate optimal daily nutritional targets based on the user's physical profile: Name, Age, Weight, Height, and Activity Level. 
@@ -56,12 +63,14 @@ export default function AppSetup() {
   const [goal, setGoal] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const completeSetup = async () => {
     setLoading(true);
+    setError(null);
     const req = `Name: ${name}, Age: ${age}, Weight: ${weight}kg, Height: ${height}cm, Activity Level: ${activityLevel}, Goal: ${goal}`;
-    await SecureStore.setItemAsync("geminiApiKey", apiKey);
     try {
+      await SecureStore.setItemAsync("geminiApiKey", apiKey);
       const response = await fetchGains(goalPrompt, req);
       const userData = JSON.parse(response);
       await db.runAsync(
@@ -83,7 +92,14 @@ export default function AppSetup() {
       await storeSetupData("true");
       router.replace("/(tabs)");
     } catch (error) {
-      console.error("Setup error:", error);
+      if (
+        axios.isAxiosError(error) &&
+        (error.response?.status === 400 || error.response?.status === 403)
+      ) {
+        setError("Invalid API key. Please check and try again.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -191,6 +207,9 @@ export default function AppSetup() {
         >
           Complete Setup
         </Button>
+        <HelperText type="error" visible={!!error}>
+          {error}
+        </HelperText>
       </ScrollView>
     </KeyboardAvoidingView>
   );
