@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useSQLiteContext } from "expo-sqlite";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
@@ -54,10 +55,12 @@ export default function AppSetup() {
   const [activityLevel, setActivityLevel] = useState("");
   const [goal, setGoal] = useState("");
   const [loading, setLoading] = useState(false);
+  const [apiKey, setApiKey] = useState("");
 
   const completeSetup = async () => {
     setLoading(true);
     const req = `Name: ${name}, Age: ${age}, Weight: ${weight}kg, Height: ${height}cm, Activity Level: ${activityLevel}, Goal: ${goal}`;
+    await SecureStore.setItemAsync("geminiApiKey", apiKey);
     try {
       const response = await fetchGains(goalPrompt, req);
       const userData = JSON.parse(response);
@@ -114,6 +117,15 @@ export default function AppSetup() {
           Let's start by setting up your profile.
         </Text>
         <TextInput
+          label="Gemini API Key"
+          mode="outlined"
+          secureTextEntry
+          disabled={loading}
+          value={apiKey}
+          onChangeText={setApiKey}
+          style={{ width: "80%", marginTop: 16 }}
+        />
+        <TextInput
           label="Name"
           mode="outlined"
           disabled={loading}
@@ -165,7 +177,16 @@ export default function AppSetup() {
           mode="contained"
           onPress={completeSetup}
           loading={loading}
-          disabled={loading}
+          disabled={
+            loading ||
+            !name ||
+            !age ||
+            !weight ||
+            !height ||
+            !activityLevel ||
+            !goal ||
+            !apiKey
+          }
           style={{ marginTop: 32 }}
         >
           Complete Setup

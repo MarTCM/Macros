@@ -1,12 +1,13 @@
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
-const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 const GEMINI_MODEL = "gemini-3-flash-preview";
 
 export async function fetchGains(
   systemPrompt: string,
   userPrompt: string,
 ): Promise<string> {
+  const GEMINI_API_KEY = await SecureStore.getItemAsync("geminiApiKey");
   const response = await axios.post(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
     {
@@ -28,6 +29,7 @@ export async function fetchGainsWithImage(
   systemPrompt: string,
   base64Image: string,
 ): Promise<string> {
+  const GEMINI_API_KEY = await SecureStore.getItemAsync("geminiApiKey");
   const response = await axios.post(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
     {
