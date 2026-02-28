@@ -1,5 +1,5 @@
 import { Stack, useRouter } from "expo-router";
-import { SQLiteProvider } from "expo-sqlite";
+import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import {
@@ -92,7 +92,7 @@ const darkTheme = {
   },
 };
 
-const initializeDatabase = async (db: any) => {
+const initializeDatabase = async (db: SQLiteDatabase) => {
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS meals (
@@ -121,6 +121,19 @@ const initializeDatabase = async (db: any) => {
       fats INTEGER NOT NULL
     );
   `);
+
+  const result = await db.getAllAsync<{ user_version: number }>(
+    `PRAGMA user_version;`,
+  );
+  const version = result[0]?.user_version ?? 0;
+
+  if (version < 1) {
+    await db.execAsync(`ALTER TABLE meals ADD COLUMN ingredients TEXT;`);
+    await db.execAsync(
+      `ALTER TABLE meals ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0;`,
+    );
+    await db.execAsync(`PRAGMA user_version = 1;`);
+  }
 };
 
 // Separate component so useRouter doesn't live in the same
