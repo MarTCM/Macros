@@ -1,10 +1,18 @@
-import { Button, Dialog, Portal, Text, useTheme } from "react-native-paper";
+import { useState } from "react";
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  Portal,
+  Text,
+  useTheme,
+} from "react-native-paper";
 
 type Props = {
   text: string;
   visible: boolean;
   onDismiss: () => void;
-  logMeal: (mealData: any) => Promise<void>;
+  logMeal: (mealData: any, favorite: boolean) => Promise<void>;
 };
 
 export default function SuggestionDialogBox({
@@ -14,6 +22,8 @@ export default function SuggestionDialogBox({
   logMeal,
 }: Props) {
   const theme = useTheme();
+
+  const [checked, setChecked] = useState(false);
 
   let mealData: any = null;
   try {
@@ -62,6 +72,11 @@ export default function SuggestionDialogBox({
                 <Text style={{ fontWeight: "bold" }}>Reason:</Text>{" "}
                 {mealData.reason}
               </Text>
+              <Checkbox.Item
+                status={checked ? "checked" : "unchecked"}
+                onPress={() => setChecked(!checked)}
+                label="Favorite?"
+              />
             </>
           ) : (
             <Text variant="bodyMedium">{text || "Analyzing..."}</Text>
@@ -72,7 +87,7 @@ export default function SuggestionDialogBox({
           <Button
             disabled={!mealData}
             onPress={async () => {
-              await logMeal(mealData);
+              await logMeal(mealData, checked);
               onDismiss();
             }}
           >

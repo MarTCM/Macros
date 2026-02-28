@@ -5,7 +5,7 @@ import { fetchGains } from "@/libs/gemini";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import axios from "axios";
 import { useSQLiteContext } from "expo-sqlite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Keyboard, ScrollView, View } from "react-native";
 
 import {
@@ -89,8 +89,13 @@ export async function suggestMeal(
 
 export default function Suggestions() {
   const theme = useTheme();
-  const { todayTotals, todayMeals, fetchTodayProgress, deleteMeal, userGoals } =
-    useMacros();
+  const {
+    todayTotals,
+    searchFavoriteMeals,
+    fetchTodayProgress,
+    deleteMeal,
+    userGoals,
+  } = useMacros();
   const db = useSQLiteContext();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [prompt, setPrompt] = useState<string>("");
@@ -128,9 +133,9 @@ export default function Suggestions() {
       setLoading(false);
     }
   }
-  const logMeal = async (mealData: any) => {
+  const logMeal = async (mealData: any, favorite: boolean) => {
     await db.runAsync(
-      `INSERT INTO meals (name, calories, protein, carbs, fats, ingredients) VALUES (?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO meals (name, calories, protein, carbs, fats, ingredients, isFavorite) VALUES (?, ?, ?, ?, ?, ?, ?);`,
       [
         mealData.name,
         mealData.calories,
@@ -138,10 +143,23 @@ export default function Suggestions() {
         mealData.carbs,
         mealData.fats,
         mealData.ingredients.join(", "),
+        favorite ? 1 : 0,
       ],
     );
     await fetchTodayProgress();
+    await loadFavoriteMeals();
   };
+
+  const [favoriteMeals, setFavoriteMeals] = useState<Meal[]>([]);
+
+  const loadFavoriteMeals = async () => {
+    const meals = await searchFavoriteMeals();
+    setFavoriteMeals(meals);
+  };
+
+  useEffect(() => {
+    loadFavoriteMeals();
+  }, []);
 
   return (
     <ScrollView
@@ -209,7 +227,7 @@ export default function Suggestions() {
         >
           Favorite Meals
         </Text>
-        {todayMeals.length === 0 ? (
+        {favoriteMeals.length === 0 ? (
           <Text
             variant="bodyMedium"
             style={{
@@ -221,7 +239,7 @@ export default function Suggestions() {
             it here!
           </Text>
         ) : (
-          todayMeals.map((meal, i) => (
+          favoriteMeals.map((meal, i) => (
             <View key={meal.id}>
               <List.Item
                 title={meal.name}
@@ -238,7 +256,7 @@ export default function Suggestions() {
                 descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
                 style={{ backgroundColor: theme.colors.surface }}
               />
-              {i < todayMeals.length - 1 && <Divider />}
+              {i < favoriteMeals.length - 1 && <Divider />}
             </View>
           ))
         )}

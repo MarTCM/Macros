@@ -24,6 +24,7 @@ type MacrosContextType = {
   fetchUserGoals: () => Promise<void>;
   deleteMeal: (id: number) => Promise<void>;
   searchDate: (date: Date) => Promise<Meal[]>;
+  searchFavoriteMeals: () => Promise<Meal[]>;
 };
 
 const MacrosContext = createContext<MacrosContextType | null>(null);
@@ -103,6 +104,17 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     [db],
   );
 
+  const searchFavoriteMeals = useCallback(async () => {
+    const mealsResult = await db.getAllAsync<Meal>(
+      `
+        SELECT id, name, calories, protein, carbs, fats, ingredients
+        FROM meals
+        WHERE isFavorite = 1;
+      `,
+    );
+    return mealsResult;
+  }, [db]);
+
   const deleteMeal = useCallback(
     async (id: number) => {
       await db.runAsync(`DELETE FROM meals WHERE id = ?;`, [id]);
@@ -121,6 +133,7 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
         fetchUserGoals,
         deleteMeal,
         searchDate,
+        searchFavoriteMeals,
       }}
     >
       {children}
