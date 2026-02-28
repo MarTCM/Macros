@@ -130,13 +130,14 @@ export default function Suggestions() {
   }
   const logMeal = async (mealData: any) => {
     await db.runAsync(
-      `INSERT INTO meals (name, calories, protein, carbs, fats) VALUES (?, ?, ?, ?, ?);`,
+      `INSERT INTO meals (name, calories, protein, carbs, fats, ingredients) VALUES (?, ?, ?, ?, ?, ?);`,
       [
         mealData.name,
         mealData.calories,
         mealData.protein,
         mealData.carbs,
         mealData.fats,
+        mealData.ingredients.join(", "),
       ],
     );
     await fetchTodayProgress();

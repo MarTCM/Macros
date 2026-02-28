@@ -7,6 +7,7 @@ export type Meal = {
   protein: number;
   carbs: number;
   fats: number;
+  ingredients: string | null;
 };
 
 type Props = {
@@ -45,6 +46,12 @@ export default function MealDetailDialog({ meal, visible, onDismiss }: Props) {
                 🧈 <Text style={{ fontWeight: "bold" }}>Fats:</Text>{" "}
                 {meal.fats}{" "}
               </Text>
+              {meal.ingredients && (
+                <Text variant="bodyMedium" style={{ marginTop: 8 }}>
+                  <Text style={{ fontWeight: "bold" }}>Ingredients:</Text>{" "}
+                  {meal.ingredients ?? ""}
+                </Text>
+              )}
             </>
           )}
         </Dialog.Content>

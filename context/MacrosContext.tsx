@@ -70,7 +70,7 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
         WHERE date = CURRENT_DATE;
       `),
       db.getAllAsync<Meal>(`
-        SELECT id, name, calories, protein, carbs, fats
+        SELECT id, name, calories, protein, carbs, fats, ingredients
         FROM meals
         WHERE date = CURRENT_DATE
         ORDER BY id DESC;
@@ -92,7 +92,7 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     async (date: Date) => {
       const mealsResult = await db.getAllAsync<Meal>(
         `
-        SELECT id, name, calories, protein, carbs, fats
+        SELECT id, name, calories, protein, carbs, fats, ingredients
         FROM meals
         WHERE date = ?;
       `,
