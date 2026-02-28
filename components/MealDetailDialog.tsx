@@ -1,3 +1,4 @@
+import { useMacros } from "@/context/MacrosContext";
 import { Button, Dialog, Portal, Text, useTheme } from "react-native-paper";
 
 export type Meal = {
@@ -8,6 +9,7 @@ export type Meal = {
   carbs: number;
   fats: number;
   ingredients: string | null;
+  isFavorite: number;
 };
 
 type Props = {
@@ -18,6 +20,7 @@ type Props = {
 
 export default function MealDetailDialog({ meal, visible, onDismiss }: Props) {
   const theme = useTheme();
+  const { toggleFavorite } = useMacros();
 
   return (
     <Portal>
@@ -56,6 +59,14 @@ export default function MealDetailDialog({ meal, visible, onDismiss }: Props) {
           )}
         </Dialog.Content>
         <Dialog.Actions>
+          <Button
+            onPress={() => {
+              toggleFavorite(meal?.id ?? 0, !!meal?.isFavorite);
+              onDismiss();
+            }}
+          >
+            {!!meal?.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+          </Button>
           <Button onPress={onDismiss}>Close</Button>
         </Dialog.Actions>
       </Dialog>

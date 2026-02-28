@@ -23,6 +23,7 @@ type MacrosContextType = {
   fetchTodayProgress: () => Promise<void>;
   fetchUserGoals: () => Promise<void>;
   deleteMeal: (id: number) => Promise<void>;
+  toggleFavorite: (id: number, isFavorite: boolean) => Promise<void>;
   searchDate: (date: Date) => Promise<Meal[]>;
   searchFavoriteMeals: () => Promise<Meal[]>;
 };
@@ -71,7 +72,7 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
         WHERE date = CURRENT_DATE;
       `),
       db.getAllAsync<Meal>(`
-        SELECT id, name, calories, protein, carbs, fats, ingredients
+        SELECT id, name, calories, protein, carbs, fats, ingredients, isFavorite
         FROM meals
         WHERE date = CURRENT_DATE
         ORDER BY id DESC;
@@ -93,7 +94,7 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
     async (date: Date) => {
       const mealsResult = await db.getAllAsync<Meal>(
         `
-        SELECT id, name, calories, protein, carbs, fats, ingredients
+        SELECT id, name, calories, protein, carbs, fats, ingredients, isFavorite
         FROM meals
         WHERE date = ?;
       `,
@@ -107,13 +108,24 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
   const searchFavoriteMeals = useCallback(async () => {
     const mealsResult = await db.getAllAsync<Meal>(
       `
-        SELECT id, name, calories, protein, carbs, fats, ingredients
+        SELECT id, name, calories, protein, carbs, fats, ingredients, isFavorite
         FROM meals
         WHERE isFavorite = 1;
       `,
     );
     return mealsResult;
   }, [db]);
+
+  const toggleFavorite = useCallback(
+    async (id: number, isFavorite: boolean) => {
+      await db.runAsync(`UPDATE meals SET isFavorite = ? WHERE id = ?;`, [
+        isFavorite ? 0 : 1,
+        id,
+      ]);
+      await fetchTodayProgress();
+    },
+    [db, fetchTodayProgress],
+  );
 
   const deleteMeal = useCallback(
     async (id: number) => {
@@ -132,6 +144,7 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
         fetchTodayProgress,
         fetchUserGoals,
         deleteMeal,
+        toggleFavorite,
         searchDate,
         searchFavoriteMeals,
       }}

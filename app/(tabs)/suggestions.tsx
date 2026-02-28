@@ -11,7 +11,6 @@ import { Keyboard, ScrollView, View } from "react-native";
 import {
   Button,
   Divider,
-  IconButton,
   List,
   Text,
   TextInput,
@@ -89,13 +88,8 @@ export async function suggestMeal(
 
 export default function Suggestions() {
   const theme = useTheme();
-  const {
-    todayTotals,
-    searchFavoriteMeals,
-    fetchTodayProgress,
-    deleteMeal,
-    userGoals,
-  } = useMacros();
+  const { todayTotals, searchFavoriteMeals, fetchTodayProgress, userGoals } =
+    useMacros();
   const db = useSQLiteContext();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [prompt, setPrompt] = useState<string>("");
@@ -182,7 +176,10 @@ export default function Suggestions() {
       <MealDetailDialog
         meal={selectedMeal}
         visible={!!selectedMeal}
-        onDismiss={() => setSelectedMeal(null)}
+        onDismiss={() => {
+          setSelectedMeal(null);
+          loadFavoriteMeals();
+        }}
       />
 
       <Text
@@ -245,12 +242,6 @@ export default function Suggestions() {
                 title={meal.name}
                 description={`${meal.calories} · ${meal.protein} P · ${meal.carbs} C · ${meal.fats} F`}
                 left={(props) => <List.Icon {...props} icon="food" />}
-                right={() => (
-                  <IconButton
-                    icon="delete"
-                    onPress={() => deleteMeal(meal.id)}
-                  />
-                )}
                 onPress={() => setSelectedMeal(meal)}
                 titleStyle={{ color: theme.colors.onSurface }}
                 descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
