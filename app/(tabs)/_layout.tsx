@@ -61,10 +61,10 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="settings"
           options={{
-            title: "Settings",
+            title: "More",
             headerShown: false,
             tabBarIcon: ({ color, size }) => (
-              <MaterialIcons name="settings" color={color} size={size} />
+              <MaterialIcons name="more-horiz" color={color} size={size} />
             ),
           }}
         />

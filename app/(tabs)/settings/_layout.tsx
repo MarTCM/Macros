@@ -12,7 +12,7 @@ export default function SettingsLayout() {
         contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Settings" }} />
+      <Stack.Screen name="index" options={{ title: "More" }} />
       <Stack.Screen name="profile" options={{ title: "Profile" }} />
       <Stack.Screen name="apikey" options={{ title: "API Key" }} />
     </Stack>
