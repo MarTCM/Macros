@@ -1,50 +1,97 @@
-# Welcome to your Expo app 👋
+# 🥗 Macros
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-## Get started
+A privacy-first, AI-powered nutrition tracker for Android. Log meals by text or camera, get personalized macro goals, and receive AI meal suggestions — all stored locally on your device.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **Animated macro progress rings** — daily calories, protein, carbs and fats
+- **AI meal analysis** — describe a meal or take a photo, Gemini extracts the macros
+- **AI meal suggestions** — get meal ideas tailored to your remaining daily macros
+- **Favorite meals** — save and re-log meals you eat often
+- **Meal history** — browse past days
+- **Personalized goals** — set up your profile once, Gemini calculates your targets
+- **Fully local** — all data stays on your device (SQLite), API key stored in secure storage
+- **Dark mode** support
 
-2. Start the app
+## Screenshots
 
-   ```bash
-   npx expo start
-   ```
+> Coming soon
 
-In the output, you'll find options to open the app in a
+## Getting Started
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Prerequisites
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- [Node.js](https://nodejs.org/) 18+
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- A [Gemini API key](https://aistudio.google.com/app/apikey) (free tier available)
 
-## Get a fresh project
-
-When you're ready, run:
+### Install
 
 ```bash
-npm run reset-project
+git clone https://github.com/MarTCM/Macros.git
+cd Macros
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Run (Expo Go)
 
-## Learn more
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Scan the QR code with the [Expo Go](https://expo.dev/client) app on your Android or iOS device.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Build APK
 
-## Join the community
+```bash
+npx expo prebuild --clean
+cd android
+./gradlew assembleRelease
+```
 
-Join our community of developers creating universal apps.
+The APK will be at `android/app/build/outputs/apk/release/app-release.apk`.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> **Note:** After a clean prebuild, recreate `android/local.properties` with your SDK path:
+>
+> ```
+> sdk.dir=/path/to/your/android-sdk
+> ```
+
+## Setup
+
+On first launch you'll be asked to:
+
+1. Enter your **Gemini API key** — stored securely on-device, never sent anywhere except Google's Gemini API
+2. Fill in your **profile** (name, age, weight, height, activity level, goal)
+3. Gemini calculates your personalized daily macro targets
+
+You can update both at any time in **Settings**.
+
+## Tech Stack
+
+|                |                                            |
+| -------------- | ------------------------------------------ |
+| Framework      | Expo SDK 54 + Expo Router v6               |
+| UI             | React Native Paper v5 (MD3)                |
+| Database       | expo-sqlite (WAL mode, migrations)         |
+| AI             | Google Gemini 3.0 Flash Preview (`v1beta`) |
+| Animations     | react-native-reanimated + react-native-svg |
+| Secure storage | expo-secure-store                          |
+| Camera         | expo-image-picker                          |
+
+## Privacy
+
+- **No account required**
+- **No telemetry or analytics**
+- **No data leaves your device** except Gemini API calls (meal text/image → Google)
+- Your Gemini API key is stored in the OS keychain via `expo-secure-store`
+
+## License
+
+Copyright (C) 2026 MarTCM
+
+This program is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License v3.0** as published by the Free Software Foundation.
+
+See [LICENSE](./LICENSE) for the full license text.
