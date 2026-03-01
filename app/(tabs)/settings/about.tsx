@@ -1,5 +1,6 @@
-import { Image, View } from "react-native";
-import { Divider, List, Text, useTheme } from "react-native-paper";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Image, Linking, View } from "react-native";
+import { Divider, IconButton, List, Text, useTheme } from "react-native-paper";
 
 const ITEMS = [
   { icon: "tag", title: "Version", value: "0.10.0" },
@@ -63,6 +64,32 @@ export default function About() {
             {i < ITEMS.length - 1 && <Divider />}
           </View>
         ))}
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          marginTop: "auto",
+          gap: 8,
+          paddingBottom: 24,
+        }}
+      >
+        <IconButton
+          icon={({ size, color }) => (
+            <MaterialCommunityIcons name="github" size={size} color={color} />
+          )}
+          size={35}
+          onPress={() => Linking.openURL("https://github.com/MarTCM")}
+        />
+        <IconButton
+          icon={({ size, color }) => (
+            <MaterialCommunityIcons name="linkedin" size={size} color={color} />
+          )}
+          size={35}
+          onPress={() =>
+            Linking.openURL("https://www.linkedin.com/in/marwane-elbaraka/")
+          }
+        />
       </View>
 
       <Text
