@@ -2,18 +2,9 @@ import CircularProgress from "@/components/CircularProgress";
 import MealDetailDialog, { Meal } from "@/components/MealDetailDialog";
 import SnackBar from "@/components/SnackBar";
 import { useMacros } from "@/context/MacrosContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
-import {
-  Button,
-  Divider,
-  IconButton,
-  List,
-  Text,
-  useTheme,
-} from "react-native-paper";
+import { Divider, IconButton, List, Text, useTheme } from "react-native-paper";
 
 export default function Index() {
   const theme = useTheme();
@@ -29,12 +20,6 @@ export default function Index() {
     hideSnack,
   } = useMacros();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
-  const router = useRouter();
-
-  const resetSetup = async () => {
-    await AsyncStorage.removeItem("isSetupComplete");
-    router.replace("/setup");
-  };
 
   useEffect(() => {
     fetchTodayProgress();
@@ -47,7 +32,7 @@ export default function Index() {
         contentContainerStyle={{
           alignItems: "center",
           gap: 32,
-          paddingVertical: 32,
+          paddingVertical: 40,
           backgroundColor: theme.colors.background,
         }}
         style={{ backgroundColor: theme.colors.background }}
@@ -64,16 +49,6 @@ export default function Index() {
         >
           Today's Intake
         </Text>
-
-        {/* TODO: remove before release */}
-        <Button
-          mode="outlined"
-          onPress={resetSetup}
-          textColor={theme.colors.error}
-        >
-          [DEV] Reset Setup
-        </Button>
-
         <CircularProgress
           current={todayTotals.calories}
           goal={userGoals.calories}
