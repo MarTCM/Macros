@@ -58,6 +58,16 @@ export default function TabsLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: "Settings",
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name="settings" color={color} size={size} />
+            ),
+          }}
+        />
       </Tabs>
     </MacrosProvider>
   );

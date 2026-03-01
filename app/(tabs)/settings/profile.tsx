@@ -1,9 +1,8 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useMacros } from "@/context/MacrosContext";
+import { fetchGains } from "@/libs/gemini";
 import axios from "axios";
-import { Link, useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { useSQLiteContext } from "expo-sqlite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import {
   Button,
@@ -12,7 +11,6 @@ import {
   TextInput,
   useTheme,
 } from "react-native-paper";
-import { fetchGains } from "../libs/gemini";
 
 const goalPrompt = `You are an expert sports nutritionist and dietitian. Your task is to calculate optimal daily nutritional targets based on the user's physical profile: Name, Age, Weight, Height, and Activity Level. 
 CRITICAL INSTRUCTIONS:
@@ -27,76 +25,82 @@ Your JSON output must exactly match the following structure:
   "protein_goal": "<number> g",
   "carbs_goal": "<number> g",
   "fats_goal": "<number> g"
-}
-`;
+}`;
 
-const storeSetupData = async (value: string) => {
-  try {
-    await AsyncStorage.setItem("isSetupComplete", value);
-  } catch (e) {
-    // saving error
-    console.error("Error saving setup data:", e);
-  }
+type UserProfile = {
+  id: number;
+  name: string;
+  age: number;
+  weight: number;
+  height: number;
+  activity_level: string;
+  goal: string;
 };
 
-export const getSetupData = async () => {
-  try {
-    const value = await AsyncStorage.getItem("isSetupComplete");
-    if (value == "true") {
-      return true;
-    }
-    return false;
-  } catch (e) {
-    return false;
-  }
-};
-
-export default function AppSetup() {
+export default function Profile() {
   const theme = useTheme();
   const db = useSQLiteContext();
-  const router = useRouter();
+  const { fetchUserGoals, showSnack } = useMacros();
+
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [activityLevel, setActivityLevel] = useState("");
   const [goal, setGoal] = useState("");
+  const [userId, setUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const completeSetup = async () => {
+  useEffect(() => {
+    db.getAllAsync<UserProfile>(
+      `SELECT id, name, age, weight, height, activity_level, goal FROM users ORDER BY id DESC LIMIT 1;`,
+    ).then((result) => {
+      if (result[0]) {
+        const u = result[0];
+        setUserId(u.id);
+        setName(u.name);
+        setAge(String(u.age));
+        setWeight(String(u.weight));
+        setHeight(String(u.height));
+        setActivityLevel(u.activity_level);
+        setGoal(u.goal);
+      }
+    });
+  }, []);
+
+  const saveProfile = async () => {
+    if (!userId) return;
     setLoading(true);
     setError(null);
     const req = `Name: ${name}, Age: ${age}, Weight: ${weight}kg, Height: ${height}cm, Activity Level: ${activityLevel}, Goal: ${goal}`;
     try {
-      await SecureStore.setItemAsync("geminiApiKey", apiKey);
       const response = await fetchGains(goalPrompt, req);
       const userData = JSON.parse(response);
       await db.runAsync(
-        `INSERT INTO users (name, age, weight, height, calories, protein, carbs, fats, activity_level, goal)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        `UPDATE users SET name=?, age=?, weight=?, height=?, activity_level=?, goal=?, calories=?, protein=?, carbs=?, fats=? WHERE id=?;`,
         [
           name,
           parseInt(age),
           parseFloat(weight),
           parseFloat(height),
+          activityLevel,
+          goal,
           userData.calorie_goal ? parseInt(userData.calorie_goal) : 2000,
           userData.protein_goal ? parseInt(userData.protein_goal) : 150,
           userData.carbs_goal ? parseInt(userData.carbs_goal) : 250,
           userData.fats_goal ? parseInt(userData.fats_goal) : 65,
-          activityLevel,
-          goal,
+          userId,
         ],
       );
-      await storeSetupData("true");
-      router.replace("/(tabs)");
-    } catch (error) {
+      await fetchUserGoals();
+      showSnack("Profile updated!");
+    } catch (err) {
       if (
-        axios.isAxiosError(error) &&
-        (error.response?.status === 400 || error.response?.status === 403)
+        axios.isAxiosError(err) &&
+        (err.response?.status === 400 || err.response?.status === 403)
       ) {
-        setError("Invalid API key. Please check and try again.");
+        setError("Invalid API key. Please update it in Settings → API Key.");
       } else {
         setError("Something went wrong. Please try again.");
       }
@@ -113,53 +117,28 @@ export default function AppSetup() {
       <ScrollView
         contentContainerStyle={{
           alignItems: "center",
-          justifyContent: "center",
           flexGrow: 1,
           paddingVertical: 32,
           backgroundColor: theme.colors.background,
         }}
-        style={{ backgroundColor: theme.colors.background }}
       >
-        <Text
-          variant="headlineMedium"
-          style={{ color: theme.colors.onBackground }}
-        >
-          Welcome to Macros!
-        </Text>
-        <Text
-          variant="bodyMedium"
-          style={{ color: theme.colors.onBackground, marginTop: 16 }}
-        >
-          Let's start by setting up your profile.
-        </Text>
         <Text
           variant="bodyMedium"
           style={{
             color: theme.colors.onSurfaceVariant,
+            width: "80%",
+            marginBottom: 16,
           }}
         >
-          You can get a Gemini API key at{" "}
-          <Text style={{ color: theme.colors.primary }}>
-            <Link href="https://aistudio.google.com">aistudio.google.com</Link>
-          </Text>
-          .
+          Update your profile. Your macro goals will be recalculated by AI.
         </Text>
-        <TextInput
-          label="Gemini API Key"
-          mode="outlined"
-          secureTextEntry
-          disabled={loading}
-          value={apiKey}
-          onChangeText={setApiKey}
-          style={{ width: "80%", marginTop: 16 }}
-        />
         <TextInput
           label="Name"
           mode="outlined"
           disabled={loading}
           value={name}
           onChangeText={setName}
-          style={{ width: "80%", marginTop: 16 }}
+          style={{ width: "80%", marginTop: 8 }}
         />
         <TextInput
           label="Age"
@@ -167,7 +146,8 @@ export default function AppSetup() {
           disabled={loading}
           value={age}
           onChangeText={setAge}
-          style={{ width: "80%", marginTop: 16 }}
+          keyboardType="numeric"
+          style={{ width: "80%", marginTop: 8 }}
         />
         <TextInput
           label="Weight (kg)"
@@ -175,7 +155,8 @@ export default function AppSetup() {
           disabled={loading}
           value={weight}
           onChangeText={setWeight}
-          style={{ width: "80%", marginTop: 16 }}
+          keyboardType="numeric"
+          style={{ width: "80%", marginTop: 8 }}
         />
         <TextInput
           label="Height (cm)"
@@ -183,7 +164,8 @@ export default function AppSetup() {
           disabled={loading}
           value={height}
           onChangeText={setHeight}
-          style={{ width: "80%", marginTop: 16 }}
+          keyboardType="numeric"
+          style={{ width: "80%", marginTop: 8 }}
         />
         <TextInput
           label="Activity Level (Lightly Active, Active, Very Active)"
@@ -191,7 +173,7 @@ export default function AppSetup() {
           disabled={loading}
           value={activityLevel}
           onChangeText={setActivityLevel}
-          style={{ width: "80%", marginTop: 16 }}
+          style={{ width: "80%", marginTop: 8 }}
         />
         <TextInput
           label="Goal (e.g., Lose Weight, Maintain Weight, Gain Muscle)"
@@ -199,11 +181,14 @@ export default function AppSetup() {
           disabled={loading}
           value={goal}
           onChangeText={setGoal}
-          style={{ width: "80%", marginTop: 16 }}
+          style={{ width: "80%", marginTop: 8 }}
         />
+        <HelperText type="error" visible={!!error}>
+          {error}
+        </HelperText>
         <Button
           mode="contained"
-          onPress={completeSetup}
+          onPress={saveProfile}
           loading={loading}
           disabled={
             loading ||
@@ -212,16 +197,12 @@ export default function AppSetup() {
             !weight ||
             !height ||
             !activityLevel ||
-            !goal ||
-            !apiKey
+            !goal
           }
-          style={{ marginTop: 32 }}
+          style={{ marginTop: 8 }}
         >
-          Complete Setup
+          Save Profile
         </Button>
-        <HelperText type="error" visible={!!error}>
-          {error}
-        </HelperText>
       </ScrollView>
     </KeyboardAvoidingView>
   );
