@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-A privacy-first, AI-powered nutrition tracker for Android. Log meals by text or camera, get personalized macro goals, and receive AI meal suggestions — all stored locally on your device.
+An open-source, privacy-first, AI-powered nutrition tracker for Android. Log meals by text or camera, get personalized macro goals, and receive AI meal suggestions — all stored locally on your device.
 
 ## Features
 
