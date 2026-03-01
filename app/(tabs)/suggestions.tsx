@@ -1,4 +1,5 @@
 import MealDetailDialog, { Meal } from "@/components/MealDetailDialog";
+import SnackBar from "@/components/SnackBar";
 import SuggestionDialogBox from "@/components/SuggestionDialog";
 import { useMacros } from "@/context/MacrosContext";
 import { fetchGains } from "@/libs/gemini";
@@ -96,6 +97,10 @@ export default function Suggestions() {
     loadFavoriteMeals,
     fetchTodayProgress,
     userGoals,
+    snackVisible,
+    snackMessage,
+    showSnack,
+    hideSnack,
   } = useMacros();
   const db = useSQLiteContext();
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
@@ -155,111 +160,119 @@ export default function Suggestions() {
         favorite ? 1 : 0,
       ],
     );
+    showSnack("Meal logged!");
     await fetchTodayProgress();
     await loadFavoriteMeals();
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        alignItems: "center",
-        justifyContent: "center",
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView
+        contentContainerStyle={{
+          alignItems: "center",
+          justifyContent: "center",
 
-        gap: 32,
-        paddingVertical: 32,
-        backgroundColor: theme.colors.background,
-      }}
-      style={{ backgroundColor: theme.colors.background }}
-    >
-      <SuggestionDialogBox
-        text={result}
-        visible={dialogVisible}
-        onDismiss={() => setDialogVisible(false)}
-        logMeal={logMeal}
-      />
-      <MealDetailDialog
-        meal={selectedMeal}
-        visible={!!selectedMeal}
-        onDismiss={() => setSelectedMeal(null)}
-      />
-
-      <Text
-        variant="headlineMedium"
-        style={{ color: theme.colors.onBackground, marginTop: 120 }}
+          gap: 32,
+          paddingVertical: 32,
+          backgroundColor: theme.colors.background,
+        }}
+        style={{ backgroundColor: theme.colors.background }}
       >
-        Want some suggestions?
-      </Text>
+        <SuggestionDialogBox
+          text={result}
+          visible={dialogVisible}
+          onDismiss={() => setDialogVisible(false)}
+          logMeal={logMeal}
+        />
+        <MealDetailDialog
+          meal={selectedMeal}
+          visible={!!selectedMeal}
+          onDismiss={() => setSelectedMeal(null)}
+        />
 
-      <TextInput
-        label="What kind of meal do you need?"
-        mode="outlined"
-        multiline
-        value={prompt}
-        onChangeText={setPrompt}
-        style={{ width: "80%", marginTop: 8 }}
-      />
-      <Button
-        mode="contained"
-        loading={loading}
-        disabled={loading}
-        icon={({ color, size }) => (
-          <MaterialCommunityIcons
-            name="crystal-ball"
-            color={color}
-            size={size}
-          />
-        )}
-        onPress={handleSend}
-      >
-        Suprise Me!
-      </Button>
-
-      <View style={{ width: "100%" }}>
         <Text
-          variant="titleMedium"
-          style={{
-            color: theme.colors.onBackground,
-            paddingHorizontal: 16,
-            paddingBottom: 8,
-          }}
+          variant="headlineMedium"
+          style={{ color: theme.colors.onBackground, marginTop: 120 }}
         >
-          Favorite Meals
+          Want some suggestions?
         </Text>
-        {favoriteMeals.length === 0 ? (
+
+        <TextInput
+          label="What kind of meal do you need?"
+          mode="outlined"
+          multiline
+          value={prompt}
+          onChangeText={setPrompt}
+          style={{ width: "80%", marginTop: 8 }}
+        />
+        <Button
+          mode="contained"
+          loading={loading}
+          disabled={loading}
+          icon={({ color, size }) => (
+            <MaterialCommunityIcons
+              name="crystal-ball"
+              color={color}
+              size={size}
+            />
+          )}
+          onPress={handleSend}
+        >
+          Suprise Me!
+        </Button>
+
+        <View style={{ width: "100%" }}>
           <Text
-            variant="bodyMedium"
+            variant="titleMedium"
             style={{
-              color: theme.colors.onSurfaceVariant,
+              color: theme.colors.onBackground,
               paddingHorizontal: 16,
+              paddingBottom: 8,
             }}
           >
-            No favorite meals added yet. Press the heart icon on any meal to add
-            it here!
+            Favorite Meals
           </Text>
-        ) : (
-          favoriteMeals.map((meal, i) => (
-            <View key={meal.id}>
-              <List.Item
-                title={meal.name}
-                description={`${meal.calories} · ${meal.protein} P · ${meal.carbs} C · ${meal.fats} F`}
-                left={(props) => <List.Icon {...props} icon="food" />}
-                right={() => (
-                  <IconButton
-                    icon="plus-circle"
-                    onPress={() => logMeal(meal, false)}
-                    style={{ marginRight: -10 }}
-                  />
-                )}
-                onPress={() => setSelectedMeal(meal)}
-                titleStyle={{ color: theme.colors.onSurface }}
-                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                style={{ backgroundColor: theme.colors.surface }}
-              />
-              {i < favoriteMeals.length - 1 && <Divider />}
-            </View>
-          ))
-        )}
-      </View>
-    </ScrollView>
+          {favoriteMeals.length === 0 ? (
+            <Text
+              variant="bodyMedium"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                paddingHorizontal: 16,
+              }}
+            >
+              No favorite meals added yet. Press the heart icon on any meal to
+              add it here!
+            </Text>
+          ) : (
+            favoriteMeals.map((meal, i) => (
+              <View key={meal.id}>
+                <List.Item
+                  title={meal.name}
+                  description={`${meal.calories} · ${meal.protein} P · ${meal.carbs} C · ${meal.fats} F`}
+                  left={(props) => <List.Icon {...props} icon="food" />}
+                  right={() => (
+                    <IconButton
+                      icon="plus-circle"
+                      onPress={() => logMeal(meal, false)}
+                      style={{ marginRight: -10 }}
+                    />
+                  )}
+                  onPress={() => setSelectedMeal(meal)}
+                  titleStyle={{ color: theme.colors.onSurface }}
+                  descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                  style={{ backgroundColor: theme.colors.surface }}
+                />
+                {i < favoriteMeals.length - 1 && <Divider />}
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
+      <SnackBar
+        visible={snackVisible}
+        message={snackMessage}
+        onDismiss={hideSnack}
+      />
+    </View>
   );
 }

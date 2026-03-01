@@ -1,4 +1,5 @@
 import DialogBox from "@/components/AnalysisDialog";
+import SnackBar from "@/components/SnackBar";
 import { useMacros } from "@/context/MacrosContext";
 import { fetchGains, fetchGainsWithImage } from "@/libs/gemini";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -41,6 +42,8 @@ export default function Gains() {
   const [result, setResult] = useState("");
   const [dialogVisible, setDialogVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackVisible, setSnackVisible] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
 
   async function pickImage() {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -89,6 +92,8 @@ export default function Gains() {
         mealData.fats,
       ],
     );
+    setSnackMessage("Meal logged!");
+    setSnackVisible(true);
     await fetchTodayProgress();
   };
 
@@ -182,6 +187,11 @@ export default function Gains() {
           </View>
         </View>
       </View>
+      <SnackBar
+        visible={snackVisible}
+        message={snackMessage}
+        onDismiss={() => setSnackVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 }

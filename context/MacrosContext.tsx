@@ -21,6 +21,10 @@ type MacrosContextType = {
   todayMeals: Meal[];
   favoriteMeals: Meal[];
   userGoals: Goals;
+  snackVisible: boolean;
+  snackMessage: string;
+  showSnack: (message: string) => void;
+  hideSnack: () => void;
   fetchTodayProgress: () => Promise<void>;
   fetchUserGoals: () => Promise<void>;
   loadFavoriteMeals: () => Promise<void>;
@@ -34,6 +38,8 @@ const MacrosContext = createContext<MacrosContextType | null>(null);
 
 export function MacrosProvider({ children }: { children: React.ReactNode }) {
   const db = useSQLiteContext();
+  const [snackVisible, setSnackVisible] = useState(false);
+  const [snackMessage, setSnackMessage] = useState("");
   const [todayTotals, setTodayTotals] = useState<Totals>({
     calories: 0,
     protein: 0,
@@ -130,14 +136,26 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
         isFavorite ? 0 : 1,
         id,
       ]);
+      setSnackMessage(
+        isFavorite ? "Removed from favorites" : "Added to favorites",
+      );
+      setSnackVisible(true);
       await Promise.all([fetchTodayProgress(), loadFavoriteMeals()]);
     },
     [db, fetchTodayProgress, loadFavoriteMeals],
   );
 
+  const hideSnack = useCallback(() => setSnackVisible(false), []);
+  const showSnack = useCallback((message: string) => {
+    setSnackMessage(message);
+    setSnackVisible(true);
+  }, []);
+
   const deleteMeal = useCallback(
     async (id: number) => {
       await db.runAsync(`DELETE FROM meals WHERE id = ?;`, [id]);
+      setSnackMessage("Meal deleted");
+      setSnackVisible(true);
       await fetchTodayProgress();
     },
     [db, fetchTodayProgress],
@@ -150,6 +168,10 @@ export function MacrosProvider({ children }: { children: React.ReactNode }) {
         todayMeals,
         favoriteMeals,
         userGoals,
+        snackVisible,
+        snackMessage,
+        showSnack,
+        hideSnack,
         fetchTodayProgress,
         fetchUserGoals,
         loadFavoriteMeals,
