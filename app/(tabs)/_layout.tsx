@@ -34,7 +34,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="gains"
           options={{
-            title: "Gains",
+            title: "Get Gains",
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="trending-up" color={color} size={size} />
             ),
