@@ -144,6 +144,7 @@ export default function Index() {
                   <IconButton
                     icon="delete"
                     onPress={() => deleteMeal(meal.id)}
+                    style={{ marginRight: -10 }}
                   />
                 )}
                 onPress={() => setSelectedMeal(meal)}

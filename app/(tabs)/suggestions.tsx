@@ -12,6 +12,7 @@ import { Keyboard, ScrollView, View } from "react-native";
 import {
   Button,
   Divider,
+  IconButton,
   List,
   Text,
   TextInput,
@@ -148,7 +149,9 @@ export default function Suggestions() {
         mealData.protein,
         mealData.carbs,
         mealData.fats,
-        mealData.ingredients.join(", "),
+        Array.isArray(mealData.ingredients)
+          ? mealData.ingredients.join(", ")
+          : (mealData.ingredients ?? ""),
         favorite ? 1 : 0,
       ],
     );
@@ -240,6 +243,13 @@ export default function Suggestions() {
                 title={meal.name}
                 description={`${meal.calories} · ${meal.protein} P · ${meal.carbs} C · ${meal.fats} F`}
                 left={(props) => <List.Icon {...props} icon="food" />}
+                right={() => (
+                  <IconButton
+                    icon="plus-circle"
+                    onPress={() => logMeal(meal, false)}
+                    style={{ marginRight: -10 }}
+                  />
+                )}
                 onPress={() => setSelectedMeal(meal)}
                 titleStyle={{ color: theme.colors.onSurface }}
                 descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
