@@ -45,6 +45,23 @@ export default function Settings() {
           descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
           style={{ backgroundColor: theme.colors.surface, marginTop: 1 }}
         />
+        <List.Item
+          title="About"
+          description="App info and credits"
+          left={(props) => <List.Icon {...props} icon="information" />}
+          right={() => (
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={theme.colors.onSurfaceVariant}
+              style={{ alignSelf: "center" }}
+            />
+          )}
+          onPress={() => router.push("/(tabs)/settings/about")}
+          titleStyle={{ color: theme.colors.onSurface }}
+          descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+          style={{ backgroundColor: theme.colors.surface, marginTop: 1 }}
+        />
       </List.Section>
     </View>
   );

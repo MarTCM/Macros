@@ -15,6 +15,7 @@ export default function SettingsLayout() {
       <Stack.Screen name="index" options={{ title: "More" }} />
       <Stack.Screen name="profile" options={{ title: "Profile" }} />
       <Stack.Screen name="apikey" options={{ title: "API Key" }} />
+      <Stack.Screen name="about" options={{ title: "About" }} />
     </Stack>
   );
 }
