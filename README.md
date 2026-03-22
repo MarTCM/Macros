@@ -19,36 +19,40 @@ An open-source, privacy-first, AI-powered nutrition tracker for Android. Log mea
 
 <table>
 	<tr>
-		<td align="center"><b>Home</b></td>
-		<td align="center"><b>About</b></td>
+		<td align="center">
+			<img src="./screenshots/1.jpeg" alt="Home" width="130" height="275" /><br/>
+			<sub><b>Home</b></sub>
+		</td>
+		<td align="center">
+			<img src="./screenshots/8.jpeg" alt="About" width="130" height="275" /><br/>
+			<sub><b>About</b></sub>
+		</td>
+		<td align="center">
+			<img src="./screenshots/4.jpeg" alt="Suggestions" width="130" height="275" /><br/>
+			<sub><b>Suggestions</b></sub>
+		</td>
+		<td align="center">
+			<img src="./screenshots/5.jpeg" alt="Suggestions" width="130" height="275" /><br/>
+			<sub><b>Suggestions</b></sub>
+		</td>
 	</tr>
 	<tr>
-		<td><img src="./screenshots/1.jpeg" alt="Home" width="170" height="360" /></td>
-		<td><img src="./screenshots/8.jpeg" alt="About" width="170" height="360" /></td>
-	</tr>
-	<tr>
-		<td align="center"><b>Suggestions</b></td>
-		<td align="center"><b>Suggestions</b></td>
-	</tr>
-	<tr>
-		<td><img src="./screenshots/4.jpeg" alt="Suggestions" width="170" height="360" /></td>
-		<td><img src="./screenshots/5.jpeg" alt="Suggestions" width="170" height="360" /></td>
-	</tr>
-	<tr>
-		<td align="center"><b>Get Gains</b></td>
-		<td align="center"><b>Get Gains</b></td>
-	</tr>
-	<tr>
-		<td><img src="./screenshots/2.jpeg" alt="Get Gains" width="170" height="360" /></td>
-		<td><img src="./screenshots/3.jpeg" alt="Get Gains" width="170" height="360" /></td>
-	</tr>
-	<tr>
-		<td align="center"><b>Get Gains</b></td>
-		<td align="center"><b>Get Gains</b></td>
-	</tr>
-	<tr>
-		<td><img src="./screenshots/6.jpeg" alt="Get Gains" width="170" height="360" /></td>
-		<td><img src="./screenshots/7.jpeg" alt="Get Gains" width="170" height="360" /></td>
+		<td align="center">
+			<img src="./screenshots/2.jpeg" alt="Get Gains" width="130" height="275" /><br/>
+			<sub><b>Get Gains</b></sub>
+		</td>
+		<td align="center">
+			<img src="./screenshots/3.jpeg" alt="Get Gains" width="130" height="275" /><br/>
+			<sub><b>Get Gains</b></sub>
+		</td>
+		<td align="center">
+			<img src="./screenshots/6.jpeg" alt="Get Gains" width="130" height="275" /><br/>
+			<sub><b>Get Gains</b></sub>
+		</td>
+		<td align="center">
+			<img src="./screenshots/7.jpeg" alt="Get Gains" width="130" height="275" /><br/>
+			<sub><b>Get Gains</b></sub>
+		</td>
 	</tr>
 </table>
 
