@@ -17,7 +17,21 @@ An open-source, privacy-first, AI-powered nutrition tracker for Android. Log mea
 
 ## Screenshots
 
-> Coming soon
+| Home                          | About                          |
+| ----------------------------- | ------------------------------ |
+| ![Home](./screenshots/1.jpeg) | ![About](./screenshots/8.jpeg) |
+
+| Suggestions                          | Suggestions                          |
+| ------------------------------------ | ------------------------------------ |
+| ![Suggestions](./screenshots/4.jpeg) | ![Suggestions](./screenshots/5.jpeg) |
+
+| Get Gains                          | Get Gains                          |
+| ---------------------------------- | ---------------------------------- |
+| ![Get Gains](./screenshots/2.jpeg) | ![Get Gains](./screenshots/3.jpeg) |
+
+| Get Gains                          | Get Gains                          |
+| ---------------------------------- | ---------------------------------- |
+| ![Get Gains](./screenshots/6.jpeg) | ![Get Gains](./screenshots/7.jpeg) |
 
 ## Getting Started
 
